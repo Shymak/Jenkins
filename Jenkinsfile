@@ -1,7 +1,7 @@
 pipeline { 
     options { timestamps() }
     environment {
-      #DOCKER_CREDS = credentials('Jenkins') 
+      DOCKER_CREDS = credentials('Jenkins') 
     }
     agent none 
     stages {  
