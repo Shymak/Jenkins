@@ -31,7 +31,7 @@ pipeline {
                 sh 'apk add --update python3 py3-pip' 
                 sh 'pip install xmlrunner' 
                 sh 'pip install -r requirements.txt || echo "No requirements file found"' 
-                sh 'python3 tets.py' // запуск тестов
+                sh 'python3 TestNoteManager.py' // запуск тестов
             } 
             post { 
                 always { 
