@@ -1,25 +1,24 @@
 pipeline { 
-    options { 
-        timestamps() 
-    } 
+    options { timestamps() }
     environment {
-        DOCKER_CREDS = credentials('tockenocker')
+        DOCKER_CREDS = credentials('Jenkins') 
     }
     agent none 
     stages {  
-        stage('Check scm') {  
+        
+        stage('Check SCM') {  
             agent any 
             steps { 
                 checkout scm 
             } 
-        } // stage Check scm
+        } 
 
         stage('Build') {  
             steps { 
-                echo "Building ...${BUILD_NUMBER}" 
+                echo "Building ... ${BUILD_NUMBER}" 
                 echo "Build completed" 
             } 
-        } // stage Build
+        } 
 
         stage('Test') { 
             agent { 
@@ -31,7 +30,8 @@ pipeline {
             steps { 
                 sh 'apk add --update python3 py3-pip' 
                 sh 'pip install xmlrunner' 
-                sh 'python3 TestNoteManager.py' 
+                sh 'pip install -r requirements.txt || echo "No requirements file found"' 
+                sh 'python3 tets.py' // запуск тестов
             } 
             post { 
                 always { 
@@ -43,15 +43,23 @@ pipeline {
                 failure { 
                     echo "Oooppss!!! Tests failed!" 
                 }  
-            } // post 
-        } // stage Test
-    
-        stage("Publish") {
+            } 
+        } 
+
+        stage('Publish') {
             agent any
             steps {
-                sh 'echo $DOCKER_CREDS_PSW | docker login --username $DOCKER_CREDS_USR --password-stdin'
-                sh 'docker build -t andriypolyuh/notes:latest .'
-                sh 'docker push andriypolyuh/notes:latest'
+                script {
+                    // Проверка, что переменные заполнены
+                    echo "Using Docker Username: $DOCKER_CREDS_USR"
+                    
+                    // Логин в Docker Hub
+                    sh 'echo $DOCKER_CREDS_PSW | docker login --username $DOCKER_CREDS_USR --password-stdin' 
+                    
+                    // Сборка и публикация Docker-образа
+                    sh 'docker build -t 4ykcha/notes:latest .' 
+                    sh 'docker push 4ykcha/notes:latest' 
+                }
             } 
         } // stage Publish
     } // stages
